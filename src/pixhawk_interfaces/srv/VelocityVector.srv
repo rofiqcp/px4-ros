@@ -1,0 +1,6 @@
+float32 vx_north_mps
+float32 vy_east_mps
+float32 duration_sec
+---
+bool success
+string message

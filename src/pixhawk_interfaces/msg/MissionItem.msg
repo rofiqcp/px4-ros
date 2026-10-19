@@ -1,0 +1,10 @@
+uint16 seq
+uint8 frame
+uint16 command
+bool current
+bool autocontinue
+float32[4] params
+int32 x
+int32 y
+float32 z
+uint8 mission_type

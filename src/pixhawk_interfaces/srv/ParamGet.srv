@@ -1,0 +1,6 @@
+string name
+---
+bool success
+uint8 mav_type
+float64 value
+string message

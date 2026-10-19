@@ -1,0 +1,57 @@
+status: BLOCKED_NOT_APPLIED
+writes_to_cube: false
+hardware_arming_allowed: false
+firmware_flashing_allowed: false
+backup_sha256: 77cf9cd3d9a54280c8b2b403992230e6452013670e25116edbce83db70fb75a3
+backup_parameter_count: 732
+snapshot:
+  SYS_AUTOSTART: 0
+  MAV_TYPE: 0
+  COM_RC_IN_MODE: 3
+  RC_CHAN_CNT: 0
+  PWM_output_assignments:
+    PWM_AUX_FUNC1: 0
+    PWM_AUX_FUNC2: 0
+    PWM_AUX_FUNC3: 0
+    PWM_AUX_FUNC4: 0
+    PWM_AUX_FUNC5: 0
+    PWM_AUX_FUNC6: 0
+    PWM_MAIN_FUNC1: 404
+    PWM_MAIN_FUNC2: 0
+    PWM_MAIN_FUNC3: 0
+    PWM_MAIN_FUNC4: 0
+    PWM_MAIN_FUNC5: 0
+    PWM_MAIN_FUNC6: 0
+    PWM_MAIN_FUNC7: 0
+    PWM_MAIN_FUNC8: 0
+  RD_parameter_names: []
+  RO_parameter_names:
+  - RO_SPEED_LIM
+  CA_parameter_names: []
+candidate_only_after_exact_firmware_verification:
+  frame: Generic Rover Differential
+  SYS_AUTOSTART: 50000
+  RD_WHEEL_TRACK: REQUIRES_MEASURED_TRACK_M_AND_PARAMETER_PRESENT
+  left_motor_output_pin: UNKNOWN_NOT_ASSIGNED
+  right_motor_output_pin: UNKNOWN_NOT_ASSIGNED
+  left_ESC_type: UNKNOWN
+  right_ESC_type: UNKNOWN
+  RC_receiver_protocol: UNKNOWN
+  RC_manual_switch: UNKNOWN
+ros_only_differential_model:
+  left_wheel_mps: v_forward_mps - yaw_rate_radps * measured_wheel_track_m / 2
+  right_wheel_mps: v_forward_mps + yaw_rate_radps * measured_wheel_track_m / 2
+  geometry_verified: false
+  control_output_enabled: false
+blockers:
+- 'No RD_* differential Rover parameters: installed firmware support unproven'
+- 'RD_WHEEL_TRACK absent: do not set SYS_AUTOSTART to 50000'
+- 'No CA_* actuator assignment parameters: output mapping schema unknown'
+- 'SYS_AUTOSTART=0: airframe not configured'
+- 'MAV_TYPE=0: generic, differential rover not confirmed'
+- No RC channels seen in backup (RC_CHAN_CNT=0)
+- No calibrated RC_MAP_* mappings
+- Installed AUTOPILOT_VERSION and PX4 Rover module capabilities unverified
+- Motor left/right pins, ESC type, reverse direction, disarmed PWM, failsafe and wheel
+  track not measured
+- Vehicle must stay disarmed with independent motor enable/kill path until bench approval

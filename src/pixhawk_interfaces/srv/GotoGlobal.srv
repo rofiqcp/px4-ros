@@ -1,0 +1,8 @@
+float64 latitude
+float64 longitude
+float64 altitude
+float64 yaw
+float32 duration_sec
+---
+bool success
+string message

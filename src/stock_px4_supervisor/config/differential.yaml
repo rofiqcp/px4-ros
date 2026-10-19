@@ -1,0 +1,8 @@
+# Read-only differential-drive preview. Wheel track MUST be measured, not guessed.
+differential_advisor:
+  ros__parameters:
+    simulation_only: false
+    wheel_track_verified: false
+    wheel_track_m: 0.0
+    wheel_speed_limit_mps: 0.35
+    advisory_timeout_s: 0.30

@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>pixhawk_avoidance_adapter</name><version>0.1.0</version>
+  <description>MID360 obstacle advisory producer; PX4 retains mission, RC and onboard mixing.</description>
+  <maintainer email="sirobo@example.com">sirobo</maintainer><license>BSD-3-Clause</license>
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <depend>rclcpp</depend><depend>sensor_msgs</depend><depend>geometry_msgs</depend>
+  <depend>std_msgs</depend><depend>tf2_ros</depend><depend>pixhawk_interfaces</depend>
+  <export><build_type>ament_cmake</build_type></export>
+</package>

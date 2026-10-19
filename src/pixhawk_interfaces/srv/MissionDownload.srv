@@ -1,0 +1,5 @@
+uint8 mission_type
+---
+bool success
+pixhawk_interfaces/MissionItem[] items
+string message

@@ -1,0 +1,5 @@
+uint32 message_id
+int32 interval_us
+---
+bool success
+string message

@@ -1,0 +1,6 @@
+uint16 command
+float32[7] params
+---
+bool success
+uint8 result
+string message

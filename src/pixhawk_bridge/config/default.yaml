@@ -1,0 +1,15 @@
+pixhawk_bridge:
+  ros__parameters:
+    device: /dev/serial/by-id/usb-3D_Robotics_PX4_FMU_v2.x_0-if00
+    baud: 115200
+    enable_motion_commands: false
+    enable_avoidance_advisory_tx: false
+    avoidance_firmware_confirmed: false
+    allow_parameter_writes: false
+    allow_mode_changes: false
+    allow_mission_writes: false
+    publish_raw_mavlink: false
+    request_auxiliary_sensor_streams: true
+    max_position_accuracy_m: 5.0
+    max_plausible_speed_mps: 30.0
+    heartbeat_timeout_sec: 3.0

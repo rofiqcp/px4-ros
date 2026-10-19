@@ -1,0 +1,28 @@
+obstacle_advisory_node:
+  ros__parameters:
+    cloud_topic: /livox/lidar
+    output_topic: /pixhawk/avoidance/advisory
+    base_frame: base_link
+    calibration_verified: false
+    simulation_only_override: false
+    obstacle_min_z_m: 0.15
+    obstacle_max_z_m: 1.75
+    max_scan_range_m: 8.0
+    robot_width_m: 0.65
+    extra_clearance_m: 0.35
+    front_slow_distance_m: 3.0
+    front_stop_distance_m: 1.15
+    side_open_distance_m: 1.2
+    front_min_points: 4
+    min_front_observed_points: 12
+    min_side_observed_points: 6
+    min_valid_scan_points: 150
+    max_processed_points: 12000
+    max_yaw_correction_rps: 0.25
+    cruise_limit_mps: 0.75
+    cloud_timeout_s: 0.30
+    wall_mode: AUTO
+    wall_target_distance_m: 0.9
+    wall_kp: 0.6
+    side_hysteresis_m: 0.35
+    advisory_rate_hz: 10.0

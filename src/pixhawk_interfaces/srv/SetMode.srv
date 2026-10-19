@@ -1,0 +1,5 @@
+uint8 main_mode
+uint8 sub_mode
+---
+bool success
+string message
