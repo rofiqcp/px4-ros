@@ -71,7 +71,7 @@ class Probe(Node):
 def main():
     rclpy.init();n=Probe()
     results={'timestamp_utc':datetime.now(timezone.utc).isoformat(),
-      'physical_device':'/dev/ttyACM0 via existing ROS2 bridge',
+      'physical_device':'configured serial device via existing ROS2 bridge',
       'probe_mode':'READ_ONLY_AND_DENIAL_TESTS',
       'firmware_flashing_performed':False,
       'cube_motor_command_sent':False,

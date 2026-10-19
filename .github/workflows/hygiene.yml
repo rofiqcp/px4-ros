@@ -1,0 +1,14 @@
+name: Repository hygiene
+on:
+  push:
+    branches: [v1]
+  pull_request:
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Reject local experiments and generated artifacts
+        run: python3 tools/check_repo_hygiene.py
+      - name: Check maintained shell syntax
+        run: bash -n build.sh env.sh run.sh verify.sh tools/build_unified.sh tools/env_unified.sh
