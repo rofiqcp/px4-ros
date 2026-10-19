@@ -1,0 +1,182 @@
+{
+  "configById": {
+    "3D!mid360main": {
+      "cameraState": {
+        "distance": 24,
+        "perspective": true,
+        "phi": 55,
+        "target": [
+          0,
+          0,
+          0
+        ],
+        "targetOffset": [
+          0,
+          0,
+          0
+        ],
+        "targetOrientation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "thetaOffset": 45,
+        "fovy": 45,
+        "near": 0.1,
+        "far": 500
+      },
+      "followMode": "follow-none",
+      "scene": {
+        "transforms": {
+          "showLabel": true,
+          "axisScale": 1
+        }
+      },
+      "transforms": {},
+      "topics": {
+        "/px4_mission/path": {
+          "visible": true
+        },
+        "/px4_mission/markers": {
+          "visible": true
+        },
+        "/livox/lidar": {
+          "visible": false
+        },
+        "/lio/path": {
+          "visible": false
+        },
+        "/p4/optimized_map": {
+          "visible": false
+        },
+        "/tf": {
+          "visible": true
+        },
+        "/tf_static": {
+          "visible": true
+        }
+      },
+      "layers": {
+        "grid": {
+          "visible": true,
+          "drawBehind": true,
+          "instanceId": "mid360-map-grid",
+          "layerId": "foxglove.Grid",
+          "size": 100,
+          "divisions": 50,
+          "lineWidth": 1,
+          "color": "#304355",
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      "synchronize": false,
+      "imageMode": {},
+      "displayFrame": "px4_mission_preview"
+    },
+    "Plot!mid360acc": {
+      "title": "PX4 mission heading and wall follower - preview only",
+      "paths": [
+        {
+          "value": "/px4_mission/preview_twist.twist.angular.z",
+          "enabled": true,
+          "label": "Preview yaw (rad/s)",
+          "timestampMethod": "receiveTime",
+          "color": "#ef8686"
+        },
+        {
+          "value": "/pixhawk/imu.angular_velocity.z",
+          "enabled": true,
+          "label": "PX4 gyro z (rad/s)",
+          "timestampMethod": "receiveTime",
+          "color": "#7aafff"
+        }
+      ],
+      "showXAxisLabels": true,
+      "showYAxisLabels": true,
+      "showLegend": true,
+      "legendDisplay": "floating",
+      "showPlotValuesInLegend": true,
+      "isSynced": true,
+      "xAxisVal": "timestamp",
+      "sidebarDimension": 240
+    },
+    "Plot!mid360gyro": {
+      "title": "PX4 mission and wall following - speed preview",
+      "paths": [
+        {
+          "value": "/px4_mission/preview_twist.twist.linear.x",
+          "enabled": true,
+          "label": "Preview speed (m/s)",
+          "timestampMethod": "receiveTime",
+          "color": "#53d8b3"
+        }
+      ],
+      "showXAxisLabels": true,
+      "showYAxisLabels": true,
+      "showLegend": true,
+      "legendDisplay": "floating",
+      "showPlotValuesInLegend": true,
+      "isSynced": true,
+      "xAxisVal": "timestamp",
+      "sidebarDimension": 240
+    },
+    "RawMessages!mid360diag": {
+      "topicToRender": "/px4_mission/status"
+    },
+    "RawMessages!mid360odom": {
+      "topicToRender": "/vesc_ackermann/diagnostics"
+    },
+    "RawMessages!px4heartbeat": {
+      "topicToRender": "/pixhawk/status"
+    },
+    "Parameters!missiontuning": {}
+  },
+  "globalVariables": {
+    "px4_mission_source": "USB PX4 stock AUTO.MISSION (READ ONLY)"
+  },
+  "userNodes": {},
+  "playbackConfig": {
+    "speed": 1
+  },
+  "layout": {
+    "direction": "row",
+    "first": "3D!mid360main",
+    "second": {
+      "direction": "column",
+      "first": {
+        "direction": "column",
+        "first": {
+          "direction": "row",
+          "first": "Plot!mid360acc",
+          "second": "Plot!mid360gyro",
+          "splitPercentage": 50
+        },
+        "second": {
+          "direction": "row",
+          "first": "RawMessages!mid360diag",
+          "second": "RawMessages!mid360odom",
+          "splitPercentage": 50
+        },
+        "splitPercentage": 52
+      },
+      "second": {
+        "direction": "row",
+        "first": "RawMessages!px4heartbeat",
+        "second": "Parameters!missiontuning",
+        "splitPercentage": 50
+      },
+      "splitPercentage": 75
+    },
+    "splitPercentage": 60
+  }
+}

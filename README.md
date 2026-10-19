@@ -57,3 +57,23 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) and [docs/DEVELOPMENT.md](docs/
 Only maintained source, ROS configuration, dependency files, documentation and required automated unit tests belong on GitHub. Temporary SITL/Gazebo experiments, probes, scripts named `test_*.py`, backup scripts for one-off hardware trials, captured parameters, telemetry, audit snapshots and local outputs stay on each computer under ignored paths. The optional CMake unit tests inside `src/stock_px4_supervisor/test/` are intentionally retained to guard safety logic.
 
 Read [AGENTS.md](AGENTS.md) before making AI-assisted changes and [SYNC_GUIDE.md](SYNC_GUIDE.md) before switching computers.
+
+## New: PX4 mission observer + Foxglove + VESC preview (MiniPC1)
+
+This workspace includes two separate ROS 2 packages:
+
+- `px4_mission_foxglove`: reads the **existing PX4 stock mission** using `/pixhawk/mission_download`, publishes waypoint path and markers, and computes a *read-only* wall-following/mission preview.
+- `px4_vesc_interface`: converts that preview into virtual Ackermann steering angle and dual VESC hub-motor ERPM diagnostics. Firmware source: [hoverboard-vesc](https://github.com/rofiqcp/hoverboard-vesc). Motor output is disabled by default, and the physical steering actuator is not currently verified.
+
+Run on MiniPC1 after `./build.sh`:
+
+```bash
+source ./env.sh
+ros2 launch px4_mission_foxglove mission_foxglove.launch.py start_usb_bridge:=true
+```
+
+The USB bridge may only start if no other MAVLink application owns the PX4 serial port. The default launcher **cannot arm, write missions, alter parameters, or transmit movement commands**. Foxglove uses a localhost-only WebSocket on port `8765` when the official `foxglove_bridge` package is installed; import [Foxglove layout](foxglove/px4_mission.layout.json).
+
+**PX4 AUTO.MISSION and external OFFBOARD steering setpoints cannot control the rover concurrently on stock firmware**. This release does not pretend to achieve that unsafe combination. The preview is for diagnostics until mission-safe control ownership and real steering hardware are commissioned.
+
+Full topics, live tuning, safety assumptions and status are documented in [PX4 mission / Foxglove / VESC integration](docs/PX4_MISSION_VESC_FOXGLOVE.md).

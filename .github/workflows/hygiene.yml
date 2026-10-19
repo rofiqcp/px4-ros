@@ -12,3 +12,5 @@ jobs:
         run: python3 tools/check_repo_hygiene.py
       - name: Check maintained shell syntax
         run: bash -n build.sh env.sh run.sh verify.sh tools/build_unified.sh tools/env_unified.sh
+      - name: PX4 mission and VESC geometry regression tests (no hardware)
+        run: python3 -m unittest discover -s tests -p 'test_*.py' -v

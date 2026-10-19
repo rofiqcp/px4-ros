@@ -17,4 +17,10 @@ PX4_ROS_KEY="$(printf '%s' "$PX4_ROS_ROOT" | cksum | cut -d' ' -f1)"
 PX4_ROS_COLCON_CACHE="${ROS_COLCON_CACHE_BASE:-${XDG_CACHE_HOME:-$HOME/.cache}/otomasi-colcon}/$(basename "$PX4_ROS_ROOT")-$PX4_ROS_KEY"
 [[ -f "$PX4_ROS_COLCON_CACHE/install/setup.bash" ]] || { echo "Build required: $PX4_ROS_ROOT/build.sh" >&2; return 1; }
 _source_ros_safe "$PX4_ROS_COLCON_CACHE/install/setup.bash"
+# Optional user-local Foxglove Bridge, installed from the signed ROS APT archive.
+FOXGLOVE_LOCAL_PREFIX="${FOXGLOVE_LOCAL_PREFIX:-$HOME/.local/ros-foxglove/opt/ros/humble}"
+if [[ -f "$FOXGLOVE_LOCAL_PREFIX/share/ament_index/resource_index/packages/foxglove_bridge" ]]; then
+  export AMENT_PREFIX_PATH="$FOXGLOVE_LOCAL_PREFIX:${AMENT_PREFIX_PATH:-}"
+  export LD_LIBRARY_PATH="$FOXGLOVE_LOCAL_PREFIX/lib:${LD_LIBRARY_PATH:-}"
+fi
 unset -f _source_ros_safe

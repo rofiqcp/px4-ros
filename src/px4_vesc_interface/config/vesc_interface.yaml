@@ -1,0 +1,19 @@
+vesc_preview:
+  ros__parameters:
+    # Observe only. Writing real motor commands requires separate supervised commissioning.
+    enable_output: false
+    hardware_verified: false
+    external_drive_authorized: false
+    vesc_port: ''
+    vesc_firmware_root: ''
+    vesc_baud: 115200
+    wheelbase_m: 0.0
+    track_width_m: 0.0
+    wheel_radius_m: 0.0
+    motor_pole_pairs: 15
+    transmission_ratio: 1.0
+    max_speed_mps: 0.35
+    max_steer_rad: 0.45
+    max_erpm: 1500
+    command_timeout_s: 0.30
+    px4_timeout_s: 2.5

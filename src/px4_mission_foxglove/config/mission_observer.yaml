@@ -1,0 +1,10 @@
+mission_observer:
+  ros__parameters:
+    mission_refresh_s: 30.0
+    status_timeout_s: 2.5
+    attitude_timeout_s: 1.5
+    advisory_timeout_s: 0.35
+    cruise_speed_mps: 0.35
+    max_yaw_rate_radps: 0.25
+    heading_kp: 0.6
+    mission_arrival_tolerance_m: 1.5
