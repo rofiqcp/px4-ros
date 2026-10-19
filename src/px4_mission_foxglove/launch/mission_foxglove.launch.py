@@ -4,6 +4,7 @@ from launch.actions import DeclareLaunchArgument, LogInfo
 from launch.conditions import IfCondition
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
+from launch_ros.parameter_descriptions import ParameterValue
 from ament_index_python.packages import get_package_prefix, PackageNotFoundError
 
 def generate_launch_description():
@@ -11,6 +12,9 @@ def generate_launch_description():
         DeclareLaunchArgument('start_usb_bridge',default_value='false',
             description='Enable ONLY if no other MAVLink program owns the Cube serial port'),
         DeclareLaunchArgument('start_foxglove',default_value='true'),
+        DeclareLaunchArgument('start_calibration_web',default_value='true'),
+        DeclareLaunchArgument('web_calibration_enabled',default_value='false'),
+        DeclareLaunchArgument('px4_calibration_enabled',default_value='false'),
         DeclareLaunchArgument('start_lidar',default_value='false',
             description='LiDAR obstacle adapter expects Livox topic /livox/lidar'),
     ]
@@ -22,6 +26,7 @@ def generate_launch_description():
                 'baud':115200,'enable_motion_commands':False,
                 'enable_avoidance_advisory_tx':False,
                 'avoidance_firmware_confirmed':False,'allow_parameter_writes':False,
+                'allow_sensor_calibration':ParameterValue(LaunchConfiguration('px4_calibration_enabled'),value_type=bool),
                 'allow_mode_changes':False,'allow_mission_writes':False,
                 'publish_raw_mavlink':False,
             }],output='screen'),
@@ -30,6 +35,11 @@ def generate_launch_description():
             parameters=[__import__('os').path.join(
                 get_package_prefix('px4_mission_foxglove'),'share',
                 'px4_mission_foxglove','config','mission_observer.yaml')]),
+        Node(package='px4_calibration_web',executable='calibration_web',
+            name='px4_calibration_web',output='screen',
+            condition=IfCondition(LaunchConfiguration('start_calibration_web')),
+            parameters=[{'address':'127.0.0.1','port':8093,
+                'enable_sensor_calibration':ParameterValue(LaunchConfiguration('web_calibration_enabled'),value_type=bool)}]),
         Node(package='px4_vesc_interface',executable='vesc_preview',
             name='vesc_preview',output='screen',
             parameters=[__import__('os').path.join(

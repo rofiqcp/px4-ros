@@ -74,6 +74,10 @@ int main(){
  i.speed_mps=2.0;i.front_m=3;
  d=s.step(i,8600);
  test(d.state==State::STOP&&d.stop_distance_m>3.0,"dynamic-braking");
+ i.speed_mps=129.7;i.front_m=7;
+ d=s.step(i,8650);
+ test(d.state==State::UNKNOWN&&d.stop&&
+      d.reason=="IMPLAUSIBLE_SPEED_TELEMETRY","reject-px4-uninitialized-speed-glitch");
  i.speed_mps=.2;i.front_m=7;clears(s,i,8700);
  i.front_m=std::numeric_limits<double>::quiet_NaN();
  test(s.step(i,9300).state==State::UNKNOWN,"reject-nan");

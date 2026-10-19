@@ -13,7 +13,7 @@ import time
 import math
 import rclpy
 from rclpy.node import Node
-from std_msgs.msg import String
+from std_msgs.msg import String, Bool
 from geometry_msgs.msg import TwistStamped
 from .kinematics import drive
 
@@ -33,6 +33,8 @@ class Preview(Node):
             self.declare_parameter(name,value)
         self.command=None;self.command_time=0.;self.px4={};self.px4_time=0.
         self.transport=None;self.last_error=''
+        self.operator_enable=False;self.operator_time=0.0
+        self.create_subscription(Bool,'/pixhawk/operator/heartbeat',self.on_operator,10)
         self.create_subscription(TwistStamped,'/px4_mission/preview_twist',self.on_cmd,10)
         self.create_subscription(String,'/pixhawk/status',self.on_px4,10)
         self.pub=self.create_publisher(String,'/vesc_ackermann/diagnostics',10)
@@ -44,6 +46,11 @@ class Preview(Node):
         x,z=msg.twist.linear.x,msg.twist.angular.z
         if math.isfinite(x) and math.isfinite(z):
             self.command=(x,z);self.command_time=time.monotonic()
+    def on_operator(self,msg):
+        # Short, independent ROS operator-enable heartbeat. A stale heartbeat is STOP.
+        self.operator_enable=(msg.data is True)
+        self.operator_time=time.monotonic()
+
     def on_px4(self,msg):
         try:
             value=json.loads(msg.data)
@@ -79,9 +86,12 @@ class Preview(Node):
         enabled=(self.prm('enable_output') and self.prm('hardware_verified') and
                  self.prm('external_drive_authorized') and
                  os.environ.get('PX4_VESC_ARM_GUARD')==ARM_GUARD)
-        rc_ok=(self.px4.get('rc_telemetry_fresh') is True and
-               self.px4.get('manual_takeover_latched') is False)
-        gate=(enabled and live and offboard and not mission and rc_ok and
+        # No RC receiver is installed. ROS operator-enable is a separate, short-lived
+        # interlock; this does NOT replace a physical E-stop or PX4 failsafes.
+        operator_ok=(self.operator_enable and
+                     now-self.operator_time<min(0.3,float(self.prm('command_timeout_s'))) and
+                     self.px4.get('manual_takeover_latched') is False)
+        gate=(enabled and live and offboard and not mission and operator_ok and
               self.px4.get('connected') is True and
               self.px4.get('airframe_configured') is True and
               self.px4.get('armed') is True)
@@ -113,7 +123,7 @@ class Preview(Node):
         state={
             'output_enabled':bool(gate and self.transport is not None),
             'armed_guard_requested':bool(enabled),'px4_auto_mission':mission,
-            'px4_offboard':offboard,'rc_verified':rc_ok,
+            'px4_offboard':offboard,'ros_operator_fresh':operator_ok,
             'cmd_fresh':fresh,'geometry':reason,
             'virtual_ackermann_steering_rad':steering,
             'wheel_left_mps':left,'wheel_right_mps':right,

@@ -1,0 +1,6 @@
+px4_calibration_web:
+  ros__parameters:
+    address: '127.0.0.1'
+    port: 8093
+    enable_sensor_calibration: false
+    refresh_interval_s: 30.0

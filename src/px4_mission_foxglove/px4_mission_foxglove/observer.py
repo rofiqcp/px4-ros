@@ -119,8 +119,8 @@ class Observer(Node):
         target=next((x for x in self.items if x.seq==self.seq and waypoint(x)),None)
         if live:
             if not mission:reason='PX4_NOT_AUTO_MISSION'
-            elif self.status.get('manual_takeover_latched') or not self.status.get('rc_telemetry_fresh'):
-                reason='RC_TAKEOVER_OR_STALE'
+            elif self.status.get('manual_takeover_latched'):
+                reason='MANUAL_TAKEOVER_ACTIVE'
             elif not self.status.get('airframe_configured') or not self.status.get('gps_valid'):
                 reason='PX4_AIRFRAME_OR_GPS_INVALID'
             elif not valid_pose:reason='GPS_OR_HEADING_STALE'

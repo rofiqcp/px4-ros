@@ -2,6 +2,7 @@
 #include "stock_px4_supervisor/safety.hpp"
 #include <rclcpp/rclcpp.hpp>
 #include <std_msgs/msg/string.hpp>
+#include <std_msgs/msg/bool.hpp>
 #include <sensor_msgs/msg/imu.hpp>
 #include <pixhawk_interfaces/msg/avoidance_advisory.hpp>
 #include <nlohmann/json.hpp>
@@ -27,6 +28,9 @@ public:
   sim_=sim;
   calib_=declare_parameter<bool>("calibration_verified",false);
   rc_verified_=declare_parameter<bool>("rc_priority_verified",false);
+  // This vehicle has NO radio receiver. ROS operator authority must be
+  // independently commissioned and publish a live heartbeat (not auto-enabled).
+  ros_operator_verified_=declare_parameter<bool>("ros_operator_authority_verified",false);
   // Steering servo PWM is not a measured steering angle; physical feedback remains unverified.
   // No stock actuator interface proven. There is intentionally no actuator output.
   Config c;
@@ -45,6 +49,7 @@ public:
   c.differential_wheel_track_m=declare_parameter<double>("differential_wheel_track_m",0.0);
   c.differential_geometry_verified=declare_parameter<bool>("differential_geometry_verified",false);
   c.max_wheel_speed_mps=declare_parameter<double>("max_wheel_speed_mps",0.35);
+  c.max_plausible_speed_mps=declare_parameter<double>("max_plausible_speed_mps",8.0);
   c.clear_confirm_frames=declare_parameter<int>("clear_confirm_frames",3);
   diff_geometry_verified_=c.differential_geometry_verified;
   safety_=std::make_unique<stock_px4::Safety>(c);
@@ -53,6 +58,10 @@ public:
   if(!c.valid())throw std::runtime_error("Invalid safety configuration");
   report_=create_publisher<std_msgs::msg::String>("/pixhawk/stock/status",10);
   suggestions_=create_publisher<pixhawk_interfaces::msg::AvoidanceAdvisory>("/pixhawk/stock/advisory",10);
+  operator_sub_=create_subscription<std_msgs::msg::Bool>(
+    "/pixhawk/operator/heartbeat",10,[this](std_msgs::msg::Bool::ConstSharedPtr m){
+      operator_ok_=m->data;last_operator_=Clock::now();
+    });
   obstacle_=create_subscription<pixhawk_interfaces::msg::AvoidanceAdvisory>(
     "/pixhawk/avoidance/advisory",10,[this](pixhawk_interfaces::msg::AvoidanceAdvisory::ConstSharedPtr m){
       last_lidar_=Clock::now();scan_seq_=m->source_scan_seq;
@@ -124,7 +133,7 @@ public:
   }
   tick_=create_wall_timer(100ms,[this]{tick();});
   RCLCPP_WARN(get_logger(),
-   "PX4 STOCK ADVISORY ONLY: hardware TX=DISABLED, rc priority unverified; simulation=%s",
+   "PX4 STOCK ADVISORY ONLY: hardware TX=DISABLED, ROS operator unverified; simulation=%s",
    sim_?"true":"false");
  }
 private:
@@ -141,8 +150,10 @@ private:
   current.imu_age_ms=age_ms(last_imu_);
   if(!sim_){
     current.calibration_verified=calib_;
-    // RC is verified only after real receiver and mode-switch acceptance tests.
-    current.rc_known=rc_verified_ && rc_telemetry_fresh_ && current.mav_connected;
+    // With no receiver, preserve the existing Safety API's rc_known semantics
+    // as independent human operator authority rather than pretending RC exists.
+    current.rc_known=ros_operator_verified_ && operator_ok_ &&
+      age_ms(last_operator_)<300 && current.mav_connected;
     current.manual_rc=manual_mode_selected_;
     // Independent encoder or calibrated steering feedback is not installed here.
     current.steering_feedback_valid=false;
@@ -171,6 +182,9 @@ private:
     {"lidar_age_ms",current.lidar_age_ms},{"mav_age_ms",current.mav_age_ms},
     {"imu_age_ms",current.imu_age_ms},{"rc_takeover_verified",current.rc_known},
     {"rc_telemetry_fresh",rc_telemetry_fresh_},
+    {"control_source","ROS_OPERATOR_HEARTBEAT"},
+    {"ros_operator_verified",ros_operator_verified_},
+    {"ros_operator_fresh",operator_ok_ && age_ms(last_operator_)<300},
     {"px4_manual_mode_selected",manual_mode_selected_},
     {"px4_main_mode",px4_main_mode_},{"px4_sub_mode",px4_sub_mode_},
     {"physical_steering_feedback_verified",false},
@@ -200,7 +214,8 @@ private:
   }
   if(d.state!=last_){RCLCPP_WARN(get_logger(),"state=%s reason=%s",stock_px4::state_name(d.state),d.reason.c_str());last_=d.state;}
  }
- bool sim_=false,calib_=false,rc_verified_=false,diff_geometry_verified_=false;
+ bool sim_=false,calib_=false,rc_verified_=false,ros_operator_verified_=false,diff_geometry_verified_=false;
+ bool operator_ok_=false;Clock::time_point last_operator_{};
  bool rc_telemetry_fresh_=false,manual_mode_selected_=false;
  int px4_main_mode_=-1,px4_sub_mode_=-1;
  bool last_sim_ack_=false;
@@ -211,6 +226,7 @@ private:
  rclcpp::Publisher<pixhawk_interfaces::msg::AvoidanceAdvisory>::SharedPtr suggestions_;
  rclcpp::Subscription<pixhawk_interfaces::msg::AvoidanceAdvisory>::SharedPtr obstacle_;
  rclcpp::Subscription<std_msgs::msg::String>::SharedPtr status_,feedback_,sim_input_;
+ rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr operator_sub_;
  rclcpp::Subscription<sensor_msgs::msg::Imu>::SharedPtr imu_;
  rclcpp::TimerBase::SharedPtr tick_;
 };

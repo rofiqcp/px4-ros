@@ -20,6 +20,7 @@ struct Config {
  double width_m=0.65, side_clearance_m=1.2, hysteresis_m=0.35;
  double wall_target_m=0.9, kp=0.6, ki=0, kd=0, max_yaw_rps=0.25;
  double differential_wheel_track_m=0.0, max_wheel_speed_mps=0.35;
+ double max_plausible_speed_mps=8.0;
  bool differential_geometry_verified=false;
  unsigned clear_confirm_frames=3;
  uint64_t advisory_timeout_ms=300, mav_timeout_ms=1500, imu_timeout_ms=400;
@@ -35,6 +36,7 @@ struct Config {
    &&std::isfinite(differential_wheel_track_m)&&differential_wheel_track_m>=0
    &&(!differential_geometry_verified || differential_wheel_track_m>0)
    &&std::isfinite(max_wheel_speed_mps)&&max_wheel_speed_mps>0&&max_wheel_speed_mps<=5
+   &&std::isfinite(max_plausible_speed_mps)&&max_plausible_speed_mps>=max_wheel_speed_mps&&max_plausible_speed_mps<=30
    &&clear_confirm_frames>=3&&clear_confirm_frames<=100
    &&advisory_timeout_ms>=100&&mav_timeout_ms>=300&&imu_timeout_ms>=100;
  }
@@ -73,10 +75,14 @@ public:
     return stop(o,State::MANUAL_RC,"RC_HAS_PRIORITY");
   }
   if(!i.rc_known){latched_=true;clear_frames_=0;operator_approved_=false;
-    return stop(o,State::UNKNOWN,"RC_PRIORITY_UNVERIFIED");}
+    return stop(o,State::UNKNOWN,"OPERATOR_AUTHORITY_UNVERIFIED");}
   const bool finite=std::isfinite(i.front_m)&&std::isfinite(i.left_m)
     &&std::isfinite(i.right_m)&&std::isfinite(i.speed_mps)
     &&i.front_m>=0&&i.left_m>=0&&i.right_m>=0&&i.speed_mps>=0;
+  if(finite && i.speed_mps>cfg_.max_plausible_speed_mps){
+    latched_=true;clear_frames_=0;operator_approved_=false;
+    return stop(o,State::UNKNOWN,"IMPLAUSIBLE_SPEED_TELEMETRY");
+  }
   const bool fresh=i.lidar_valid&&i.tf_valid&&i.calibration_verified&&i.mav_connected
     &&i.estimator_valid&&i.imu_valid&&i.steering_feedback_valid&&i.mission_auto
     &&i.lidar_age_ms<=cfg_.advisory_timeout_ms

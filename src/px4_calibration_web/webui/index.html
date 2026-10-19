@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#081323"><title>PX4 Calibration · MiniPC1</title>
+<style>
+:root{color-scheme:dark;font:14px/1.5 Inter,system-ui,-apple-system,Segoe UI,sans-serif;--bg:#081323;--panel:#101f31;--panel2:#15273c;--border:#2d4257;--text:#e8eff6;--muted:#98acc0;--blue:#61c0fb;--green:#50dbba;--yellow:#f7c978;--red:#ff8396}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse 800px 500px at 85% -20%,#18446755,transparent),var(--bg);color:var(--text)}
+a{color:var(--blue)}button{cursor:pointer;font:inherit}button:disabled{opacity:.4;cursor:not-allowed}
+header{position:sticky;top:0;z-index:5;background:#0b1929f2;backdrop-filter:blur(15px);border-bottom:1px solid var(--border)}
+.wrap{max-width:1500px;padding:20px 26px;margin:auto}.head{display:flex;gap:20px;align-items:center;flex-wrap:wrap;justify-content:space-between}
+.logo{display:flex;align-items:center;gap:12px}.mark{width:40px;height:40px;border-radius:13px;background:linear-gradient(135deg,#44c6fc,#276baf);display:grid;place-items:center;color:white;font-weight:800}
+h1{font-size:20px;letter-spacing:-.03em;margin:0}h2{font-size:17px;margin:0 0 14px}h3{font-size:15px;margin:0 0 10px}p{color:var(--muted);margin:6px 0 14px}.subtitle{font-size:12px;color:var(--muted)}
+.topright{display:flex;align-items:center;gap:12px;flex-wrap:wrap}.pill{border:1px solid var(--border);padding:6px 11px;border-radius:30px;color:var(--muted);font-size:12px}
+.dot{display:inline-block;width:8px;height:8px;border-radius:20px;background:var(--red);margin-right:6px}.dot.ok{background:var(--green)}
+.btn{background:#225d86;color:#f2fbff;border:1px solid #3483b1;border-radius:9px;padding:9px 13px;font-weight:600}.btn:hover{background:#2c709e}.btn.sec{background:#162b40;border-color:#38516a}.btn.warning{background:#644021;border-color:#a26b3c}
+.nav{display:flex;gap:6px;margin:20px 0;overflow-x:auto}.tab{padding:10px 15px;border:1px solid transparent;color:var(--muted);background:transparent;border-radius:9px;white-space:nowrap}.tab.sel{color:#def4ff;background:#162b41;border-color:#406785}
+.panel{background:linear-gradient(145deg,#14263a,#101d2f);border:1px solid var(--border);border-radius:14px;padding:18px;min-width:0}
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}.wide{grid-column:span 2}.full{grid-column:1/-1}
+.metric{font-size:27px;font-weight:730;letter-spacing:-.03em}.small{font-size:12px;color:var(--muted)}
+.good{color:var(--green)}.bad{color:var(--red)}.warn{color:var(--yellow)}.muted{color:var(--muted)}
+.kv{display:flex;justify-content:space-between;gap:12px;border-top:1px solid #233a50;padding:9px 0}.kv:first-child{border-top:0}.kv>span:first-child{color:var(--muted)}.kv strong{font-variant-numeric:tabular-nums;text-align:right;overflow-wrap:anywhere}
+.blocker{display:flex;gap:12px;padding:12px;border-bottom:1px solid #233a50}.blocker:last-child{border:0}.number{background:#3a302a;color:#ffda99;padding:4px 8px;border-radius:6px;min-width:38px;text-align:center;font-size:12px;font-weight:700;height:fit-content}
+.critical{border-left:3px solid var(--red)}.note{background:#142941;border:1px solid #38536a;border-radius:10px;padding:12px 15px;color:#c8dcec}
+.cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.calcard{background:#102035;border:1px solid var(--border);border-radius:12px;padding:16px}
+.calcard ol{color:var(--muted);padding-left:20px;margin:8px 0 16px}.calcard li{margin:5px 0}
+table{width:100%;border-collapse:collapse}th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);padding:10px}td{padding:10px;border-top:1px solid #263d51}td:nth-child(2){font-family:ui-monospace,monospace}code{background:#1e3347;padding:3px 6px;border-radius:5px}
+.event{padding:9px 0;border-bottom:1px solid #22384d;white-space:pre-wrap;overflow-wrap:anywhere}
+.section{margin-bottom:18px}.inline{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.page{display:none}.page.active{display:block}.hero{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+.count{font-size:12px;color:var(--muted)}.refresh{font-size:12px;color:var(--muted)}
+label{display:flex;align-items:center;gap:8px;color:#cbd9e7}.foot{color:var(--muted);font-size:12px;margin:30px 0}
+@media(max-width:900px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.cards{grid-template-columns:1fr}}
+@media(max-width:560px){.wrap{padding:14px}.grid{grid-template-columns:1fr}.wide{grid-column:1}.metric{font-size:23px}td,th{padding:8px 5px;font-size:12px}}
+</style></head><body>
+<header><div class="wrap head"><div class="logo"><div class="mark">PX4</div><div><h1>Calibration &amp; Readiness</h1><div class="subtitle">MiniPC1 · PX4 stock · ROS 2 Humble · MAVLink USB</div></div></div>
+<div class="topright"><span class="pill" id="conn"><span class="dot"></span>Memuat PX4</span><span class="pill" id="arm">ARM: —</span><span class="refresh" id="last">Memuat data…</span>
+<button class="btn sec" id="refresh">Baca ulang parameter</button></div></div></header>
+<main class="wrap">
+<div class="note section"><b>Mode aman.</b> Web ini tidak menyediakan perintah ARM, force-arm, penggantian failsafe atau perintah motor. Sensor calibration hanya tersedia bila diaktifkan secara eksplisit pada web dan MAVLink bridge, dengan motor diisolasi.</div>
+<nav class="nav" aria-label="Halaman"><button class="tab sel" data-tab="overview">Ringkasan</button><button class="tab" data-tab="calibration">Kalibrasi sensor</button><button class="tab" data-tab="params">Parameter PX4</button><button class="tab" data-tab="prearm">Pre-arm &amp; log</button></nav>
+<section class="page active" id="overview">
+<div class="grid section">
+<div class="panel"><div class="small">Status PX4</div><div class="metric" id="link">—</div><p id="fcu">USB · menunggu heartbeat</p></div>
+<div class="panel"><div class="small">Flight mode</div><div class="metric" id="mode">—</div><p id="mission">Misi dari PX4</p></div>
+<div class="panel"><div class="small">GPS &amp; estimator</div><div class="metric" id="gps">—</div><p id="pos">Position: —</p></div>
+<div class="panel"><div class="small">Pre-arm checks</div><div class="metric" id="blockers">—</div><p id="armcheck">PX4 tetap berwenang menolak ARM</p></div>
+<div class="panel wide"><h2>Kondisi sensor &amp; kalibrasi</h2><div id="sensorstats"></div></div>
+<div class="panel wide"><h2>Kesiapan konfigurasi</h2><div id="issues">Memuat parameter…</div></div>
+<div class="panel wide"><h2>ROS / VESC</h2><div id="rosstate"></div></div>
+<div class="panel wide"><h2>Informasi perangkat</h2><div id="device"></div></div>
+</div></section>
+<section class="page" id="calibration"><div class="hero section"><div><h2>Wizard kalibrasi PX4</h2><p>Gyro, akselerometer enam sisi, kompas dan level. Status ID sensor bukan bukti kualitas kalibrasi.</p></div><span id="calflag" class="pill">Kontrol: nonaktif</span></div>
+<div class="note section"><b>Sebelum mengkalibrasi:</b> kendaraan harus disarmed, roda/aktuator terisolasi secara fisik, Cube stabil, USB terkoneksi, dan hanya satu aplikasi memegang port serial. Proses sensor tertentu memerlukan gerakan manual sesuai instruksi. Jangan lakukan kalibrasi ESC/motor dari halaman ini.</div>
+<div class="cards section" id="calc"></div>
+<div class="panel"><h3>Status progres/ACK kalibrasi</h3><div id="calresult">Belum ada tindakan</div><p class="small">Jika PX4 mengirim STATUSTEXT progress, lihat tab Pre-arm &amp; log. Status ACK diterima bukan otomatis berarti kalibrasi selesai.</p></div>
+</section>
+<section class="page" id="params"><div class="hero section"><div><h2>Parameter konfigurasi PX4</h2><p>Parameter dibaca langsung dari pengendali lewat MAVLink, tidak ditulis oleh web.</p></div><input id="search" placeholder="Cari nama parameter…" style="background:#101f31;color:white;border:1px solid #36516a;padding:10px;border-radius:9px;min-width:210px"></div>
+<div id="paramgroups"></div><p class="small">Nilai “belum didapat” dapat berarti belum selesai dibaca, firmware tidak mendukung parameter, atau response timeout. Jangan menebak nilainya.</p></section>
+<section class="page" id="prearm"><div class="grid section"><div class="panel wide"><h2>Uji pra-arm tanpa menyalakan motor</h2><p>Minta PX4 menjalankan ulang pre-arm checks menggunakan <code>MAV_CMD_RUN_PREARM_CHECKS (401)</code>. Tidak meminta <code>ARM (400)</code>.</p><button class="btn" id="prearmBtn">Jalankan pengecekan pre-arm</button><p class="small">Respons ACCEPTED berarti pemeriksaan diminta, bukan berarti kendaraan aman/siap ARM.</p><div class="note" id="actionstate">Belum diuji</div></div>
+<div class="panel wide"><h2>Urutan persiapan tanpa RC</h2><div class="blocker"><div class="number">01</div><div>Tetapkan airframe rover resmi yang cocok pada PX4 (<code>SYS_AUTOSTART</code> belum terisi).</div></div><div class="blocker"><div class="number">02</div><div>Sesuaikan <code>COM_RC_IN_MODE</code>: <code>1</code> untuk joystick MAVLink atau <code>4</code> tanpa manual input. Jangan nonaktifkan failsafe data-link/E-stop.</div></div><div class="blocker"><div class="number">03</div><div>Kalibrasikan gyro, accelerometer, compass dan level; verifikasi estimator serta sensor.</div></div><div class="blocker"><div class="number">04</div><div>Untuk AUTO.MISSION, pastikan GPS/posisi global sehat dan misi valid. Tidak cukup hanya <code>COM_ARM_WO_GPS=1</code>.</div></div><div class="blocker"><div class="number">05</div><div>Uji ARM nyata hanya pada bench terisolasi, setelah operator memastikan sistem keselamatan independen.</div></div></div>
+<div class="panel full"><h2>Event dan STATUSTEXT PX4</h2><div id="events"><p>Belum menerima event</p></div></div></div></section>
+<p class="foot">Local-only · <code>127.0.0.1:8093</code> · tidak perlu QGroundControl untuk monitor sensor/parameter · motor dan mission TX tidak dikendalikan halaman ini.</p>
+</main>
+<script>
+(()=>{'use strict';
+let state=null;const $=id=>document.getElementById(id);const esc=s=>String(s??'—').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+const yes=(v)=>v===true?'<span class="good">VALID</span>':v===false?'<span class="bad">BELUM</span>':'<span class="muted">N/A</span>';
+const kv=(k,v)=>'<div class="kv"><span>'+esc(k)+'</span><strong>'+v+'</strong></div>';
+const age=(s)=>!Number.isFinite(s)?'—':s.toFixed(1)+' dtk';
+document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{
+document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('sel',x===b));
+document.querySelectorAll('.page').forEach(x=>x.classList.toggle('active',x.id===b.dataset.tab));
+}));
+async function post(path,body={}){try{
+ const r=await fetch(path,{method:'POST',headers:{'Content-Type':'application/json','X-PX4-Action':'local-operator'},body:JSON.stringify(body)});
+ const j=await r.json();alert(j.message||j.error||('HTTP '+r.status));await poll();
+}catch(e){alert('Gagal terhubung ke server: '+e.message)}}
+$('refresh').onclick=()=>post('/api/refresh');$('prearmBtn').onclick=()=>post('/api/prearm');
+function render(o){
+state=o;const s=o.status||{},p=o.parameters||{},sns=o.sensor||{},x=o.blockers||[];
+const live=s.connected===true;document.querySelector('#conn .dot').classList.toggle('ok',live);
+$('conn').lastChild.textContent=live?'PX4 terhubung':'PX4 tidak terhubung';
+$('arm').textContent='ARM: '+(s.armed?'AKTIF':'DISARMED');$('arm').style.color=s.armed?'var(--red)':'var(--green)';
+$('last').textContent='Heartbeat '+age(o.status_age_s);
+$('link').innerHTML=live?'<span class="good">TERHUBUNG</span>':'<span class="bad">OFFLINE</span>';
+$('fcu').textContent='SYSID '+(s.sysid??'—')+' · '+(s.port_open?'USB terbuka':'port offline');
+$('mode').textContent=''+(s.px4_main_mode??'—')+' / '+(s.px4_sub_mode??'—');
+$('mission').textContent=(s.px4_main_mode===4&&s.px4_sub_mode===4)?'AUTO.MISSION':'Bukan AUTO.MISSION';
+$('gps').innerHTML=yes(s.gps_valid);
+$('pos').textContent='Local estimate: '+(s.local_valid?'valid':'belum valid');
+$('blockers').textContent=x.length;
+$('armcheck').textContent=s.mav_state===0?'PX4 UNINITIALIZED':'Catatan diagnostik, bukan izin ARM';
+const vals=[
+['Gyro / IMU',(sns.imu?'<span class="good">Data diterima</span> · '+age(sns.imu.age_s):'<span class="muted">Belum terdeteksi</span>')],
+['GPS',sns.gps?'Fix status '+esc(sns.gps.value.fix_type_ros)+' · '+age(sns.gps.age_s):'Menunggu sensor'],
+['Mag ID',p.CAL_MAG0_ID?.available?esc(p.CAL_MAG0_ID.value):'Belum didapat'],
+['Accel ID',p.CAL_ACC0_ID?.available?esc(p.CAL_ACC0_ID.value):'Belum didapat'],
+['Gyro ID',p.CAL_GYRO0_ID?.available?esc(p.CAL_GYRO0_ID.value):'Belum didapat'],
+['MagneticField',sns.mag?'Data '+age(sns.mag.age_s):'Belum diterima'],
+['Barometer',sns.barometer?'Tekanan '+esc(sns.barometer.value.pressure_pa?.toFixed(0))+' Pa':'Belum diterima'],
+['Sensor health',sns.sensor_health?esc(sns.sensor_health.value).slice(0,170):'Menunggu'],
+['Battery',(sns.battery?esc(sns.battery.value.voltage?.toFixed(2))+' V':'Belum didapat')]];
+$('sensorstats').innerHTML=vals.map(z=>kv(...z)).join('');
+$('issues').innerHTML=x.length?x.map(a=>'<div class="blocker"><div class="number">'+esc(a.code)+'</div><div>'+esc(a.message)+'</div></div>').join(''):'<p>Belum ada masalah yang terdeteksi pada pemeriksaan lokal; cek pre-arm PX4 tetap diperlukan.</p>';
+const rs=sns.vesc?.value||{},mission=sns.mission?.value||{};
+$('rosstate').innerHTML=kv('VESC output',yes(rs.output_enabled))+kv('ROS operator heartbeat',yes(rs.ros_operator_fresh))+
+kv('Mode VESC',esc(rs.mode||'—'))+kv('Misi terbaca',esc(mission.downloaded_items??'—'))+kv('Preview motor',esc(rs.geometry??'Belum ada'));
+$('device').innerHTML=kv('Firmware',esc(sns.firmware?.value||'Menunggu AUTOPILOT_VERSION'))+
+kv('Airframe SYS_AUTOSTART',p.SYS_AUTOSTART?.available?esc(p.SYS_AUTOSTART.value):'Membaca…')+
+kv('COM_RC_IN_MODE',p.COM_RC_IN_MODE?.available?esc(p.COM_RC_IN_MODE.value):'Membaca…')+
+kv('GPS valid',yes(s.gps_valid)) +kv('RC receiver diwajibkan oleh preview ROS','<span class="good">Tidak</span>');
+$('calflag').textContent=o.calibration_enabled?'Tindakan kalibrasi tersedia jika disarmed & operator konfirmasi':'Tindakan fisik DIKUNCI';
+$('calflag').style.color=o.calibration_enabled?'var(--yellow)':'var(--muted)';
+$('calc').innerHTML=Object.entries(o.calibrations||{}).map(([key,c])=>{
+const disabled=!o.calibration_enabled||!live||s.armed;
+return '<div class="calcard"><h3>'+esc(c.label)+'</h3><ol>'+c.steps.map(t=>'<li>'+esc(t)+'</li>').join('')+
+'</ol><button class="btn warning" data-cal="'+esc(key)+'" '+(disabled?'disabled':'')+'>Mulai kalibrasi</button> '+
+(disabled?'<span class="small">Belum diizinkan</span>':'<span class="small">Harus isolasi motor terlebih dahulu</span>')+'</div>';
+}).join('');
+document.querySelectorAll('[data-cal]').forEach(btn=>btn.onclick=()=>{
+if(!confirm('Pastikan Cube DISARMED dan SEMUA aktuator/motor dilepas dari suplai tenaga. Lanjutkan?'))return;
+const value=prompt('Ketik MOTORS_ISOLATED untuk mengonfirmasi bahwa motor diisolasi:');
+if(value==='MOTORS_ISOLATED')post('/api/calibrate',{kind:btn.dataset.cal,confirm:value});
+});
+const act=o.action||{};$('calresult').textContent=(act.kind||'—')+': '+(act.state||'—')+' — '+(act.message||'—');
+$('actionstate').textContent=(act.kind||'—')+' | '+(act.state||'—')+' | '+(act.message||'—');
+$('events').innerHTML=(o.events||[]).length?o.events.slice(0,40).map(e=>'<div class="event"><span class="small">'+new Date(e.at*1000).toLocaleTimeString()+'</span> '+esc(e.message)+'</div>').join(''):'<p>Belum ada event PX4 setelah dashboard dibuka.</p>';
+$('prearmBtn').disabled=!live||s.armed;
+renderParams(o);
+}
+function renderParams(o){
+const groups=o.parameter_groups||{},p=o.parameters||{},filter=($('search').value||'').toUpperCase();
+$('paramgroups').innerHTML=Object.entries(groups).map(([name,names])=>{
+ const filtered=names.filter(k=>k.includes(filter));if(!filtered.length)return '';
+ return '<div class="panel section"><h3>'+esc(name)+'</h3><div style="overflow-x:auto"><table><thead><tr><th>Parameter</th><th>Nilai</th><th>Type</th><th>Status</th></tr></thead><tbody>'+
+ filtered.map(k=>{const v=p[k];return '<tr><td><code>'+esc(k)+'</code></td><td>'+
+ (v?.available?esc(v.value):'—')+'</td><td>'+esc(v?.mav_type??'—')+'</td><td>'+
+ (v?.available?'<span class="good">Dibaca</span>':esc(v?.message||'Menunggu'))+'</td></tr>';}).join('')+
+ '</tbody></table></div></div>';
+}).join('');
+}
+$('search').addEventListener('input',()=>state&&renderParams(state));
+async function poll(){
+try{const res=await fetch('/api/status',{cache:'no-store'});if(!res.ok)throw new Error('HTTP '+res.status);
+render(await res.json());}catch(err){$('conn').textContent='Web offline';$('last').textContent=err.message;}}
+poll();setInterval(poll,1500);
+})();
+</script></body></html>

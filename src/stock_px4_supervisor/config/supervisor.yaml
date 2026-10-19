@@ -2,9 +2,13 @@ stock_px4_supervisor:
   ros__parameters:
     simulation_only: false
     calibration_verified: false
+    # No RC receiver: ROS operator heartbeat is required and NOT assumed verified.
+    ros_operator_authority_verified: false
     slow_distance_m: 3.0
     stop_distance_m: 1.15
     # Differential drive: measured wheel-to-wheel center distance, not Ackermann wheelbase.
     differential_geometry_verified: false
     differential_wheel_track_m: 0.0
     max_wheel_speed_mps: 0.35
+    # Reject implausible VFR_HUD speed instead of trusting uninitialized telemetry.
+    max_plausible_speed_mps: 8.0

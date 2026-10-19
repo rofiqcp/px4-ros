@@ -77,3 +77,25 @@ The USB bridge may only start if no other MAVLink application owns the PX4 seria
 **PX4 AUTO.MISSION and external OFFBOARD steering setpoints cannot control the rover concurrently on stock firmware**. This release does not pretend to achieve that unsafe combination. The preview is for diagnostics until mission-safe control ownership and real steering hardware are commissioned.
 
 Full topics, live tuning, safety assumptions and status are documented in [PX4 mission / Foxglove / VESC integration](docs/PX4_MISSION_VESC_FOXGLOVE.md).
+
+## PX4 calibration dashboard & no-RC bench readiness
+
+The MiniPC1 read-only calibration console is available at
+**http://127.0.0.1:8093** whenever the combined ROS launcher is running.
+It reads gyro/accelerometer/compass IDs, GPS, IMU, system parameters, pre-arm
+diagnostics and PX4 status over the already-owned MAVLink USB bridge.
+
+```bash
+source ./env.sh
+ros2 launch px4_mission_foxglove mission_foxglove.launch.py \
+  start_usb_bridge:=true start_calibration_web:=true
+```
+
+Do **not** start a second serial owner when the bridge is already running.
+Actual ARM and motor output remain disabled. Calibration commands are
+independently locked on the web and in the bridge until an isolated-bench
+operator intentionally enables both. No RC receiver is required for mission
+preview, but the future active ROS operator gate requires a fresh independent
+heartbeat and physical emergency stop.
+
+Full commissioning steps: [PX4 Calibration Web](docs/PX4_CALIBRATION_WEB.md).

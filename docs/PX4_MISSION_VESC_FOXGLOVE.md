@@ -62,9 +62,9 @@ For the supervisor and obstacle node, inspect their package-local YAML, RViz-ind
 
 Firmware source: https://github.com/rofiqcp/hoverboard-vesc (checked out separately at `/home/otomasi/Project/hoverboard-vesc`). Its USART3 control protocol is VESC 6-compatible, with left local VESC ID 1 and right virtual CAN ID 2; the ROS adapter calls firmware-provided `VescDual.set_rpm` only behind independent interlocks.
 
-**Hardware available now: two drive motors, not a confirmed physical steering actuator.** Ackermann angle is a preview only, and the two wheel setpoints are a differential approximation. Do not present this as real Ackermann servo feedback or steering control. Before moving a physical vehicle, verify wheelbase, track width, wheel diameter, gearing, motor pole pairs, wheel polarity, mechanical steering servo, encoder feedback, RC takeover, emergency stop and which controller actually owns each actuator.
+**Hardware available now: two drive motors, not a confirmed physical steering actuator.** Ackermann angle is a preview only, and the two wheel setpoints are a differential approximation. Do not present this as real Ackermann servo feedback or steering control. Before moving a physical vehicle, verify wheelbase, track width, wheel diameter, gearing, motor pole pairs, wheel polarity, mechanical steering servo, encoder feedback, ROS operator takeover, emergency stop and which controller actually owns each actuator.
 
-The bridge defaults to `enable_output=false`, `hardware_verified=false`, `external_drive_authorized=false` and blank `vesc_port`. Even if set, it rejects PX4 AUTO.MISSION and requires OFFBOARD, an armed/healthy PX4, fresh RC and a separate process-level guard. This is a commissioning safeguard, **not a certified functional safety system**. It is intentionally not armed or tested on a live motor in this delivery.
+The bridge defaults to `enable_output=false`, `hardware_verified=false`, `external_drive_authorized=false` and blank `vesc_port`. Even if set, it rejects PX4 AUTO.MISSION and requires OFFBOARD, an armed/healthy PX4, fresh ROS operator heartbeat, a physical E-stop and a separate process-level guard. This is a commissioning safeguard, **not a certified functional safety system**. It is intentionally not armed or tested on a live motor in this delivery.
 
 ## Published topics
 
@@ -93,3 +93,5 @@ invalid GPS/local position, and no fresh RC telemetry. Therefore the
 mission observer correctly emits zero movement preview and the VESC bridge
 reports `MONITOR_ONLY`. Live wall-follow execution and Foxglove mission
 route rendering cannot be accepted as hardware-verified with those inputs.
+
+The optional localhost-only PX4 calibration and pre-arm web panel is documented at [PX4_CALIBRATION_WEB.md](PX4_CALIBRATION_WEB.md).

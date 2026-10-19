@@ -29,3 +29,8 @@ Applies to the entire `px4-ros` repository. Prefer concise changes that retain e
 ## Clean coding rules
 
 No dead code, unused imports, speculative fallback behavior, unreviewed bulk renames or blanket changes to CMake/vendor sources. Use explicit error handling, bounds checks and meaningful names. Never bury an unsafe control change in documentation cleanup. Keep commands idempotent where possible. Preserve third-party license notices. Never commit secrets, data dumps, hardware logs or telemetry. Do not use `git add -f` to override ignore policy.
+
+## PX4 calibration and ROS-only controls
+
+11. For PX4 calibration, prefer local read-only dashboard and MAV_CMD_RUN_PREARM_CHECKS (401); never expose an ARM HTTP endpoint or bypass checks. Sensor calibration (241) must require both independent opt-ins, disarmed PX4 and isolated motors.
+12. No RC receiver is installed: a fresh ROS operator heartbeat and independent physical E-stop must be verified before actuator authority, with defaults fail-closed. COM_RC_IN_MODE must not be changed on hardware during docs or web tasks.

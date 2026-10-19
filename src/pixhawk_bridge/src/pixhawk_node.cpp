@@ -110,6 +110,7 @@ public:
     allow_param_write_=declare_parameter<bool>("allow_parameter_writes",false);
     allow_mode_=declare_parameter<bool>("allow_mode_changes",false);
     allow_mission_=declare_parameter<bool>("allow_mission_writes",false);
+    allow_sensor_calibration_=declare_parameter<bool>("allow_sensor_calibration",false);
     allow_velocity_=declare_parameter<bool>("allow_stock_rover_velocity",false);
     rover_confirmed_=declare_parameter<bool>("stock_rover_interface_confirmed",false);
     raw_enabled_=declare_parameter<bool>("publish_raw_mavlink",false);
@@ -175,7 +176,7 @@ public:
     close_port();
   }
 private:
-  std::string device_;int baud_=115200;bool enable_motion_=false,allow_param_write_=false,allow_mode_=false,allow_mission_=false,raw_enabled_=false,auto_sensor_streams_=true;
+  std::string device_;int baud_=115200;bool enable_motion_=false,allow_param_write_=false,allow_mode_=false,allow_mission_=false,allow_sensor_calibration_=false,raw_enabled_=false,auto_sensor_streams_=true;
   bool allow_velocity_=false,rover_confirmed_=false;
   bool avoidance_tx_{false},avoidance_fw_confirmed_{false};
   uint32_t avoidance_session_{0};
@@ -789,7 +790,8 @@ private:
   }
   bool is_read_only(uint16_t cmd)const{
     return cmd==MAV_CMD_REQUEST_MESSAGE||cmd==MAV_CMD_REQUEST_AUTOPILOT_CAPABILITIES||
-      cmd==MAV_CMD_SET_MESSAGE_INTERVAL||cmd==MAV_CMD_REQUEST_PROTOCOL_VERSION;
+      cmd==MAV_CMD_SET_MESSAGE_INTERVAL||cmd==MAV_CMD_REQUEST_PROTOCOL_VERSION||
+      cmd==MAV_CMD_RUN_PREARM_CHECKS;
   }
   bool motion_ready(bool global,std::string &reason){
     if(!connected()){reason="MAVLink heartbeat stale/unavailable";return false;}
@@ -809,7 +811,29 @@ private:
   void setup_services(){
     auto cmd=create_service<iface::CommandLong>("command_long",
       [this](std::shared_ptr<iface::CommandLong::Request> r,std::shared_ptr<iface::CommandLong::Response> s){
-        const bool read=is_read_only(r->command);
+        // Sensor calibration is a disarmed, explicit opt-in; unlike arm, it cannot
+        // be enabled by general movement permission or a web page alone.
+        const bool calib=r->command==MAV_CMD_PREFLIGHT_CALIBRATION;
+        const bool calibration_allowed=calib && allow_sensor_calibration_ && !armed_;
+        if(calib){
+          unsigned selected=0;
+          for(size_t i=0;i<7;i++){
+            const float v=r->params[i];
+            if(!std::isfinite(v) || v<0){s->message="Invalid calibration parameters";return;}
+            if(v!=0)++selected;
+            if(i!=0 && i!=1 && i!=4 && v!=0){
+              s->message="Only gyro, mag, accel and level calibrations allowed";return;
+            }
+          }
+          if(selected!=1 || r->params[0]>1 || r->params[1]>1 ||
+             (r->params[4]!=0 && r->params[4]!=1 && r->params[4]!=2)){
+            s->message="Unsupported or multiple simultaneous calibrations";return;
+          }
+          if(!calibration_allowed || !connected()){
+            s->message="Calibration requires disarmed connected PX4 and allow_sensor_calibration=true";return;
+          }
+        }
+        const bool read=is_read_only(r->command) || calibration_allowed;
         if(manual_takeover_latched_ && !read &&
            !(r->command==MAV_CMD_COMPONENT_ARM_DISARM && r->params[0]<=0)){
           s->message="RC_MANUAL_TAKEOVER_LATCHED";return;
