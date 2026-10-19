@@ -82,3 +82,14 @@ The bridge defaults to `enable_output=false`, `hardware_verified=false`, `extern
 ## Why mode handover is still required
 
 MAVLink mission download is allowed while PX4 owns AUTO.MISSION. OFFBOARD has distinct streaming and timeout/arming semantics. Directly mixing internal mission setpoints with external motor control is prohibited; either use a verified PX4-native mission replanning mechanism, or explicitly pause/hand over to OFFBOARD with tested failsafe and resume logic.
+
+## Observed MiniPC1 hardware state (2026-10-19)
+
+Real PX4 USB heartbeat and AUTOPILOT_VERSION were observed. A direct read-only
+`/pixhawk/mission_download` call returned `success=True`, **zero** mission
+items: no waypoint route is available to visualize yet. PX4 reported AUTO
+submode 3 (not AUTO.MISSION submode 4), disarmed, airframe unconfigured,
+invalid GPS/local position, and no fresh RC telemetry. Therefore the
+mission observer correctly emits zero movement preview and the VESC bridge
+reports `MONITOR_ONLY`. Live wall-follow execution and Foxglove mission
+route rendering cannot be accepted as hardware-verified with those inputs.

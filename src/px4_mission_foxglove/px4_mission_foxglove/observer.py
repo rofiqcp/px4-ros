@@ -52,7 +52,10 @@ class Observer(Node):
         except (ValueError,TypeError):return
         if isinstance(value,dict) and value.get('type')=='MISSION_CURRENT':
             seq=value.get('seq')
-            if type(seq) is int and 0<=seq<=1000:self.seq=seq
+            if type(seq) is int and 0<=seq<=1000 and seq!=self.seq:
+                self.seq=seq
+                if self.items:
+                    self.publish_waypoints()
     def recv_gps(self,m):
         if m.status.status>=0 and all(math.isfinite(v) for v in (m.latitude,m.longitude)):
             if -90<=m.latitude<=90 and -180<=m.longitude<=180:
